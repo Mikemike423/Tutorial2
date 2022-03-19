@@ -23,6 +23,8 @@ public class PlayerScript : MonoBehaviour
     public TextMeshProUGUI loseText;
     public TextMeshProUGUI livesText;
 
+    public Animator anim;
+
     public int jumpForce;
     public int lives = 3;
     private int scoreValue = 0;
@@ -78,10 +80,17 @@ public class PlayerScript : MonoBehaviour
     }
     private void OnCollisionStay2D(Collision2D collision)
     {
+        if(Input.GetKey(KeyCode.A)||Input.GetKey(KeyCode.D)){
+            anim.SetInteger("state", 1);
+        }
+        else {
+            anim.SetInteger("state", 0);
+        }
         if (collision.collider.tag == "Ground")
         {
             if (Input.GetKey(KeyCode.W))
             {
+                anim.SetInteger("state", 2);
                 rd2d.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
             }
         }
