@@ -2,30 +2,44 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 public class PlayerScript : MonoBehaviour
 {
- private Rigidbody2D rd2d;
+    private Rigidbody2D rd2d;
+
+    public AudioClip victoryTheme;
+    public AudioClip music;
+    public AudioSource sounds;
 
     public float speed;
 
-    public Text score;
-    public int jumpForce;
+    private bool inLevel2 = false;
+    private bool won = false;
 
+    public GameObject level2Spawn;
+
+    public TextMeshProUGUI score;
+    public TextMeshProUGUI winText;
+    public TextMeshProUGUI loseText;
+    public TextMeshProUGUI livesText;
+
+    public int jumpForce;
+    public int lives = 3;
     private int scoreValue = 0;
 
     // Start is called before the first frame update
     void Start()
     {
+        sounds.clip = music;
+        sounds.Play();
         rd2d = GetComponent<Rigidbody2D>();
-        score.text = scoreValue.ToString();
+        score.text = "Coins: " + scoreValue.ToString();
+        livesText.text = "Lives: " + lives;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (Input.GetKeyDown(KeyCode.Escape)){
-            Application.Quit();
-        }
         float hozMovement = Input.GetAxis("Horizontal");
         rd2d.AddForce(new Vector2(hozMovement * speed, 0.0f));
     }
@@ -35,12 +49,33 @@ public class PlayerScript : MonoBehaviour
        if (collision.collider.tag == "Coin")
         {
             scoreValue += 1;
-            score.text = scoreValue.ToString();
-            Destroy(collision.collider.gameObject);
+            score.text = "Coins: " + scoreValue.ToString();
+            Destroy(collision.collider.gameObject);        
         }
-
+        if (collision.collider.tag == "Enemy" && !won){
+            Destroy(collision.collider.gameObject);
+            lives--;
+            livesText.text = "Lives: " + lives;
+        }
+        if (lives <= 0) {
+            Destroy(this.gameObject);
+            loseText.gameObject.SetActive(true);
+        }
+        if (scoreValue >= 4 && !inLevel2) {
+            this.gameObject.transform.position = level2Spawn.transform.position;
+            lives = 3;
+            livesText.text = "Lives: " + lives;
+            inLevel2 = true;
+        }
+        if (scoreValue >= 8) {
+            sounds.clip = victoryTheme;
+            sounds.loop = false;
+            sounds.Play();
+            won = true;
+            winText.gameObject.SetActive(true);
+            Destroy(this.gameObject);
+        }
     }
-
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.collider.tag == "Ground")
